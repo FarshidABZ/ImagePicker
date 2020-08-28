@@ -23,5 +23,7 @@
     <string name="error_failed_to_compress_image">Failed to compress image</string>
     <string name="error_task_cancelled">Task Cancelled</string>
 
+    <string name="choose_from_gallery">Choose from gallery</string>
+    <string name="choose_from_camera">Choose from camera</string>
 
 </resources>

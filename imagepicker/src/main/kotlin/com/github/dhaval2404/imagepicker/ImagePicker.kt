@@ -1,14 +1,15 @@
 package com.github.dhaval2404.imagepicker
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import com.github.dhaval2404.imagepicker.constant.ImageProvider
-import com.github.dhaval2404.imagepicker.listener.ResultListener
-import com.github.dhaval2404.imagepicker.util.DialogHelper
+import com.github.dhaval2404.imagepicker.util.ImagePickerBottomSheetDialog
 import com.github.florent37.inlineactivityresult.kotlin.startForResult
 import java.io.File
 
@@ -130,6 +131,7 @@ open class ImagePicker {
         /**
          * Call this while picking image for fragment.
          */
+        @SuppressLint("UseRequireInsteadOfGet")
         constructor(fragment: Fragment) : this(fragment.activity!!) {
             this.fragment = fragment
         }
@@ -284,33 +286,52 @@ open class ImagePicker {
          * Pick Image Provider if not specified
          */
         private fun showImageProviderDialog(reqCode: Int) {
-            DialogHelper.showChooseAppDialog(activity, object : ResultListener<ImageProvider> {
-                override fun onResult(t: ImageProvider?) {
-                    t?.let {
-                        imageProvider = it
-                        imageProviderInterceptor?.invoke(imageProvider)
-                        startActivity(reqCode)
+            val fragmentManage: FragmentManager = if (fragment != null) {
+                fragment?.childFragmentManager!!
+            } else {
+                (activity as AppCompatActivity).supportFragmentManager
+            }
+
+            ImagePickerBottomSheetDialog().apply {
+                this.setOnMenuSelectedItemListener(object :
+                    ImagePickerBottomSheetDialog.OnMenuSelectedItemListener {
+                    override fun onMenuSelectedItem(result: ImageProvider?) {
+                        result?.let {
+                            imageProvider = it
+                            imageProviderInterceptor?.invoke(imageProvider)
+                            startActivity(reqCode)
+                        }
                     }
-                }
-            })
+                })
+            }.show(fragmentManage, "imagePicker")
         }
 
         /**
          * Pick Image Provider if not specified
          */
         private fun showImageProviderDialog(completionHandler: ((resultCode: Int, data: Intent?) -> Unit)? = null) {
-            DialogHelper.showChooseAppDialog(activity, object : ResultListener<ImageProvider> {
-                override fun onResult(t: ImageProvider?) {
-                    if (t != null) {
-                        imageProvider = t
-                        imageProviderInterceptor?.invoke(imageProvider)
-                        startActivity(completionHandler)
-                    } else {
-                        val intent = ImagePickerActivity.getCancelledIntent(activity)
-                        completionHandler?.invoke(Activity.RESULT_CANCELED, intent)
+            val fragmentManage: FragmentManager = if (fragment != null) {
+                fragment?.childFragmentManager!!
+            } else {
+                (activity as AppCompatActivity).supportFragmentManager
+            }
+
+            ImagePickerBottomSheetDialog().apply {
+                this.setOnMenuSelectedItemListener(object :
+                    ImagePickerBottomSheetDialog.OnMenuSelectedItemListener {
+                    override fun onMenuSelectedItem(result: ImageProvider?) {
+                        if (result != null) {
+                            imageProvider = result
+                            imageProviderInterceptor?.invoke(imageProvider)
+                            startActivity(completionHandler)
+                        } else {
+                            val intent =
+                                ImagePickerActivity.getCancelledIntent(activity as AppCompatActivity)
+                            completionHandler?.invoke(Activity.RESULT_CANCELED, intent)
+                        }
                     }
-                }
-            })
+                })
+            }.show(fragmentManage, "imagePicker")
         }
 
         /**

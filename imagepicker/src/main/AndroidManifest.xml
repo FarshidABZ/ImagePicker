@@ -6,9 +6,10 @@
 
     <application>
 
-        <activity android:name=".ImagePickerActivity"
-                  android:theme="@style/Theme.Transparent.ImagePicker"
-                  android:screenOrientation="unspecified"/>
+        <activity
+            android:name=".ImagePickerActivity"
+            android:screenOrientation="unspecified"
+            android:theme="@style/Theme.Transparent.ImagePicker" />
 
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"
